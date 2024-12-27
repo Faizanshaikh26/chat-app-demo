@@ -33,7 +33,7 @@ app.get("/logout", logout);
 
 // After here user must be logged in to access the routes
 
-app.use(isAuthenticated);
+// app.use(isAuthenticated);
 
 app.get("/me", getMyProfile);
 app.put("/update", singleAvatar, updateMyProfile);

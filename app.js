@@ -34,7 +34,7 @@ dotenv.config({
 });
 
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 7000;
 const envMode = process.env.NODE_ENV?.trim() || "PRODUCTION";
 
 const userSocketIDs = new Map();
@@ -79,11 +79,27 @@ io.use((socket, next) => {
   );
 });
 
+
+
+// Log when a socket connects and disconnects
 io.on("connection", (socket) => {
+  console.log(`New connection established with socket ID: ${socket.id}`);
+
   const user = socket.user;
+  if (user) {
+    console.log(`User connected: ${user.name} (ID: ${user._id})`);
+  } else {
+    console.error("No user data found during connection.");
+  }
+
   userSocketIDs.set(user._id.toString(), socket.id);
 
+  // Log when a NEW_MESSAGE event is received
   socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
+    console.log(`NEW_MESSAGE event received from ${user.name}`);
+    console.log(`Message: ${message}, Chat ID: ${chatId}`);
+    console.log(`Members: ${JSON.stringify(members)}`);
+    
     const messageForRealTime = {
       content: message,
       _id: uuid(),
@@ -110,22 +126,27 @@ io.on("connection", (socket) => {
 
     try {
       await Message.create(messageForDB);
+      console.log(`Message saved to DB successfully.`);
     } catch (error) {
-      console.error("Error saving message:", error);
+      console.error("Error saving message to DB:", error);
     }
   });
 
+  // Log other events
   socket.on(START_TYPING, ({ members, chatId }) => {
+    console.log(`${user.name} started typing in chat: ${chatId}`);
     const membersSockets = getSockets(members);
     socket.to(membersSockets).emit(START_TYPING, { chatId });
   });
 
   socket.on(STOP_TYPING, ({ members, chatId }) => {
+    console.log(`${user.name} stopped typing in chat: ${chatId}`);
     const membersSockets = getSockets(members);
     socket.to(membersSockets).emit(STOP_TYPING, { chatId });
   });
 
   socket.on(CHAT_JOINED, ({ userId, members }) => {
+    console.log(`User ${userId} joined a chat`);
     onlineUsers.add(userId.toString());
 
     const membersSocket = getSockets(members);
@@ -133,24 +154,33 @@ io.on("connection", (socket) => {
   });
 
   socket.on(CHAT_LEAVED, ({ userId, members }) => {
+    console.log(`User ${userId} left a chat`);
     onlineUsers.delete(userId.toString());
 
     const membersSocket = getSockets(members);
     io.to(membersSocket).emit(ONLINE_USERS, Array.from(onlineUsers));
   });
 
+  // Log on disconnect
   socket.on("disconnect", () => {
+    console.log(`Socket disconnected: ${socket.id}`);
     userSocketIDs.delete(user._id.toString());
     onlineUsers.delete(user._id.toString());
+    console.log(`User ${user.name} (ID: ${user._id}) disconnected`);
     socket.broadcast.emit(ONLINE_USERS, Array.from(onlineUsers));
   });
 });
 
-app.use(errorMiddleware);
 
+// Log when the server starts
 server.listen(port, () => {
   console.log(`Server is running on port ${port} in ${envMode} Mode`);
+  console.log(`Socket.IO server is ready and waiting for connections.`);
 });
+
+app.use(errorMiddleware);
+
+
 
 export {  envMode, userSocketIDs };
 
