@@ -23,17 +23,18 @@ const connectDB = (uri) => {
 const sendToken = (res, user, code, message) => {
   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
 
-  return res.status(code).cookie("instaChat-token", token, cookieOptions).json({
+  return res.status(code).cookie("token", token, cookieOptions).json({
     success: true,
     user,
     message,
+    token
   });
 };
 
 const generateToken = () => {
   return jwt.sign(
     { data: "reset_password_token" },
-    process.env.JWT_SECRET || "Insta-CHat",
+    process.env.JWT_SECRET || "token",
     {
       expiresIn: "1h",
     }

@@ -1,3 +1,58 @@
+import mongoose, { Schema, model } from "mongoose";
+// // import { hash } from "bcrypt";
+
+// // const schema = new Schema(
+// //   {
+// //     name: {
+// //       type: String,
+// //       required: true,
+// //     },
+// //     email: {
+// //       type: String,
+// //       required: true,
+// //       unique:true
+// //     },
+// //     bio: {
+// //       type: String,
+// //       required: true,
+// //     },
+// //     username: {
+// //       type: String,
+// //       required: true,
+// //       unique: true,
+// //     },
+// //     password: {
+// //       type: String,
+// //       required: true,
+// //       select: false,
+// //     },
+// //     avatar: {
+// //       public_id: {
+// //         type: String,
+// //         required: true,
+// //       },
+// //       url: {
+// //         type: String,
+// //         required: true,
+// //       },
+// //     },
+// //     resetPasswordToken: String,
+// //     resetPasswordExpires: Date,
+// //   },
+// //   {
+// //     timestamps: true,
+// //   }
+// // );
+
+// // schema.pre("save", async function (next) {
+// //   if (!this.isModified("password")) return next();
+
+// //   this.password = await hash(this.password, 10);
+// //   next();
+// // });
+
+// // export const User = mongoose.models.User || model("User", schema);
+
 // import mongoose, { Schema, model } from "mongoose";
 // import { hash } from "bcrypt";
 
@@ -10,7 +65,7 @@
 //     email: {
 //       type: String,
 //       required: true,
-//       unique:true
+//       unique: true,
 //     },
 //     bio: {
 //       type: String,
@@ -29,15 +84,19 @@
 //     avatar: {
 //       public_id: {
 //         type: String,
-//         required: true,
+//         // required: true,
 //       },
 //       url: {
 //         type: String,
-//         required: true,
+//         // required: true,
 //       },
 //     },
-//     resetPasswordToken: String,
-//     resetPasswordExpires: Date,
+//     role: {
+//       type: String,
+//       enum: ["admin", "user"], 
+//       default: "user",        
+//     },
+  
 //   },
 //   {
 //     timestamps: true,
@@ -53,63 +112,15 @@
 
 // export const User = mongoose.models.User || model("User", schema);
 
-import mongoose, { Schema, model } from "mongoose";
-import { hash } from "bcrypt";
 
-const schema = new Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    bio: {
-      type: String,
-      required: true,
-    },
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-      select: false,
-    },
-    avatar: {
-      public_id: {
-        type: String,
-        required: true,
-      },
-      url: {
-        type: String,
-        required: true,
-      },
-    },
-    role: {
-      type: String,
-      enum: ["admin", "user"], 
-      default: "user",        
-    },
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
-  },
-  {
-    timestamps: true,
-  }
-);
 
-schema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+// const mongoose = require("mongoose");
 
-  this.password = await hash(this.password, 10);
-  next();
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  isAdmin: { type: Boolean, default: false },
 });
 
-export const User = mongoose.models.User || model("User", schema);
-
+export const User = mongoose.models.User || model("User", userSchema);

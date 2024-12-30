@@ -1,71 +1,36 @@
 import express from "express";
+
+import { isAuthenticated } from "../middlewares/auth.js";
 import {
-  addMembers,
-  deleteChat,
-  getChatDetails,
-  getMessages,
-  getMyChats,
-  getMyGroups,
-  leaveGroup,
-  newGroupChat,
-  removeMember,
-  renameGroup,
-  sendAttachments,
-  unsendMessage,
-} from "../controllers/chat.js";
-import {
-  addMemberValidator,
   chatIdValidator,
-  newGroupValidator,
-  removeMemberValidator,
-  renameValidator,
-  sendAttachmentsValidator,
+  sendMessageValidator,
+  
   validateHandler,
 } from "../lib/validators.js";
-import { isAuthenticated } from "../middlewares/auth.js";
-import { attachmentsMulter } from "../middlewares/multer.js";
+import { getMessages, sendMessage } from "../controllers/chat.js";
 
 const app = express.Router();
 
-// After here user must be logged in to access the routes
-
+// Middleware to ensure user is authenticated
 // app.use(isAuthenticated);
 
-app.post("/new", newGroupValidator(), validateHandler, newGroupChat);
+// // Create a new chat (one-to-one)
+// app.post("/new", newChat);
 
-app.get("/my", getMyChats);
+// // Fetch all chats for the logged-in user
+// app.get("/my", getMyChats);
 
-app.get("/my/groups", getMyGroups);
+// // Send a message to a chat
+// app.post("/message", sendMessageValidator(), validateHandler, sendMessage);
 
-app.put("/addmembers", addMemberValidator(), validateHandler, addMembers);
+// // Get messages for a specific chat
+// app.get("/message/:id", chatIdValidator(), validateHandler, getMessages);
 
-app.put(
-  "/removemember",
-  removeMemberValidator(),
-  validateHandler,
-  removeMember
-);
 
-app.delete("/message/:id", unsendMessage);
-app.delete("/leave/:id", chatIdValidator(), validateHandler, leaveGroup);
+app.get("/getMessages/:adminId", getMessages);
 
-// Send Attachments
-app.post(
-  "/message",
-  attachmentsMulter,
-  sendAttachmentsValidator(),
-  validateHandler,
-  sendAttachments
-);
+// Route to send a new message
+app.post("/sendMessage",  sendMessage);
 
-// Get Messages
-app.get("/message/:id", chatIdValidator(), validateHandler, getMessages);
-
-// Get Chat Details, rename,delete
-app
-  .route("/:id")
-  .get(chatIdValidator(), validateHandler, getChatDetails)
-  .put(renameValidator(), validateHandler, renameGroup)
-  .delete(chatIdValidator(), validateHandler, deleteChat);
 
 export default app;
